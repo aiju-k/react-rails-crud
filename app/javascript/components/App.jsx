@@ -1,9 +1,10 @@
 import React from "react";
+import Editor from "./Editor"; 
 
-export default function HelloMessage(props) {
+export default function App() {
   return (
     <div>
-      <h1>Hello {props.name}</h1>
+      <Editor />
     </div>
   )
 }
