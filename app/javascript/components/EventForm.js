@@ -1,19 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { isEmptyObject, validateEvent, formatDate } from '../helpers/helpers';
 import Pikaday from 'pikaday';
 import 'pikaday/css/pikaday.css';
+import { useParams } from 'react-router-dom';
 
-const EventForm = ({ onSave }) => {
-  const [event, setEvent] = useState({
-    event_type: '',
-    event_date: '',
-    title: '',
-    speaker: '',
-    host: '',
-    published: false,
-  });
+const EventForm = ({ events, onSave }) => {
+  const { id } = useParams();
 
+  const initialEventState = useCallback(
+    () => {
+      const defaults = {
+        event_type: '',
+        event_date: '',
+        title: '',
+        speaker: '',
+        host: '',
+        published: false,
+      };
+
+      const currentEvent = id
+        ? events.find((e) => e.id === Number(id)) : {};
+
+      return { ...defaults, ...currentEvent };
+    },
+    [events, id],
+  );
+
+  const [event, setEvent] = useState(initialEventState);
   const [formErrors, setFormErrors] = useState({});
 
   const dateInput = useRef(null);
@@ -61,6 +75,7 @@ const EventForm = ({ onSave }) => {
   useEffect(() => {
     const p = new Pikaday({
       field: dateInput.current,
+      toString: (date) => formatDate(date),
       onSelect: (date) => {
         const formattedDate = formatDate(date);
         dateInput.current.value = formattedDate;
@@ -72,6 +87,10 @@ const EventForm = ({ onSave }) => {
     // Reactはアンマウントの前にこれを呼び出す
     return () => p.destroy();
   }, []);
+
+  useEffect(() => {
+    setEvent(initialEventState);
+  }, [events, initialEventState]);
 
   return (
     <section>
@@ -87,6 +106,7 @@ const EventForm = ({ onSave }) => {
               id="event_type"
               name="event_type"
               onChange={handleInputChange}
+              value={event.event_type}
             />
           </label>
         </div>
@@ -99,6 +119,8 @@ const EventForm = ({ onSave }) => {
               name="event_date"
               ref={dateInput}
               autoComplete="off"
+              value={event.event_date}
+              onChange={handleInputChange}
             />
           </label>
         </div>
@@ -111,6 +133,7 @@ const EventForm = ({ onSave }) => {
               id="title"
               name="title"
               onChange={handleInputChange}
+              value={event.title}
             />
           </label>
         </div>
@@ -122,6 +145,7 @@ const EventForm = ({ onSave }) => {
               id="speaker"
               name="speaker"
               onChange={handleInputChange}
+              value={event.speaker}
             />
           </label>
         </div>
@@ -133,6 +157,7 @@ const EventForm = ({ onSave }) => {
               id="host"
               name="host"
               onChange={handleInputChange}
+              value={event.host}
             />
           </label>
         </div>
@@ -144,6 +169,7 @@ const EventForm = ({ onSave }) => {
               id="published"
               name="published"
               onChange={handleInputChange}
+              checked={event.published}
             />
           </label>
         </div>
@@ -158,5 +184,20 @@ const EventForm = ({ onSave }) => {
 export default EventForm;
 
 EventForm.propTypes = {
+  events: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.number.isRequired,
+      event_type: PropTypes.string.isRequired,
+      event_date: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      speaker: PropTypes.string.isRequired,
+      host: PropTypes.string.isRequired,
+      published: PropTypes.bool.isRequired,
+    }),
+  ),
   onSave: PropTypes.func.isRequired,
+};
+
+EventForm.defaultProps = {
+  events: [],
 };
