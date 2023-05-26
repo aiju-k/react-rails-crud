@@ -1,25 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Link, NavLink } from 'react-router-dom';
 
-export default function EventList(props) {
+const EventList = ({ events }) => {
+  const [currentEvent, setCurrentEvent] = useState();
+
   const renderEvents = (eventArray) => {
     eventArray.sort((a, b) => new Date(b.event_data) - new Date(a.event_data));
 
     return eventArray.map((event) => (
-      <li key={event.id}>
-        {event.event_date}
-        {' - '}
-        {event.event_type}
+      <li key={event.id} id={String(event.id)} className={event.id === currentEvent ? 'active' : ''}>
+        <NavLink to={`/events/${event.id}`} onClick={() => setCurrentEvent(event.id)}>
+          {event.event_date}
+          {' - '}
+          {event.event_type}
+        </NavLink>
       </li>
     ));
   };
+
   return (
-    <div className="container">
+    <div className="eventList">
       <h2>Events</h2>
-      <ul>{renderEvents(props.events)}</ul>
+      <Link to="/events/new">new</Link>
+      <ul>{renderEvents(events)}</ul>
     </div>
   );
-}
+};
 
 EventList.propTypes = {
   events: PropTypes.arrayOf(PropTypes.shape({
@@ -32,3 +39,5 @@ EventList.propTypes = {
     published: PropTypes.bool,
   })).isRequired,
 };
+
+export default EventList;

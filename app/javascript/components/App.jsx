@@ -1,10 +1,12 @@
-import React from "react";
-import Editor from "./Editor"; 
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Editor from './Editor';
+import './App.css';
 
-export default function App() {
-  return (
-    <div>
-      <Editor />
-    </div>
-  )
-}
+const App = () => (
+  <Routes>
+    <Route path="events/*" element={<Editor />} />
+  </Routes>
+);
+
+export default App;
